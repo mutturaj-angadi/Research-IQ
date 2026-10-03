@@ -17,7 +17,6 @@
     "allowJs": false,
     "types": ["node"],
     "plugins": [{ "name": "next" }],
-    "baseUrl": ".",
     "paths": { "@/*": ["./*"] }
   },
   "include": ["next-env.d.ts", "app", "components", "lib", "scripts", "tests", "middleware.ts", ".next/types/**/*.ts"],

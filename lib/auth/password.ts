@@ -1,5 +1,4 @@
 import { randomBytes, scrypt as scryptCb, timingSafeEqual, type ScryptOptions } from 'node:crypto';
-import { z } from 'zod';
 
 const N = 16384, R = 8, P = 1, KEYLEN = 64;
 
@@ -24,11 +23,3 @@ export async function verifyPassword(password: string, stored: string): Promise<
   });
   return key.length === expected.length && timingSafeEqual(key, expected);
 }
-
-export const passwordSchema = z
-  .string()
-  .min(10, 'Password must be at least 10 characters')
-  .max(128, 'Password must be at most 128 characters')
-  .regex(/[a-z]/, 'Password must contain a lowercase letter')
-  .regex(/[A-Z]/, 'Password must contain an uppercase letter')
-  .regex(/[0-9]/, 'Password must contain a digit');
