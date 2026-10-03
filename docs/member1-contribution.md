@@ -1,0 +1,2 @@
+# Member 1 contribution
+Relational design (16 tables, constraints, 4 migrations with rollbacks), indexes, views/functions/triggers, seed data and 26 documented queries; pgvector storage with HNSW and stale-embedding lifecycle; PDF ingestion (validation, extraction, cleaning, chunking, metadata, idempotent reprocessing); keyword (FTS) and semantic search with SQL-side filtering; evidence-grounded Q&A data model and service; validation, errors, authorization, rate limiting, safe logging; tests and the integration contract for Member 2.

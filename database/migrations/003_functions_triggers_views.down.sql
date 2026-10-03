@@ -1,0 +1,12 @@
+BEGIN;
+DROP FUNCTION IF EXISTS get_paper_statistics(uuid);
+DROP VIEW IF EXISTS paper_summary_view;
+DROP TRIGGER IF EXISTS trg_papers_completed_guard ON papers;
+DROP FUNCTION IF EXISTS enforce_completed_requires_embeddings();
+DROP TRIGGER IF EXISTS trg_authors_normalize ON authors;
+DROP FUNCTION IF EXISTS normalize_author_name();
+DROP TRIGGER IF EXISTS trg_chunks_updated ON paper_chunks;
+DROP TRIGGER IF EXISTS trg_papers_updated ON papers;
+DROP TRIGGER IF EXISTS trg_users_updated ON users;
+DROP FUNCTION IF EXISTS set_updated_at();
+COMMIT;

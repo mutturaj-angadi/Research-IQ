@@ -1,0 +1,96 @@
+erDiagram
+    users ||--o{ user_roles : has
+    roles ||--o{ user_roles : grants
+    users ||--o{ papers : uploads
+    papers ||--o{ paper_authors : has
+    authors ||--o{ paper_authors : writes
+    papers ||--o{ paper_categories : tagged
+    categories ||--o{ paper_categories : classifies
+    papers ||--o{ paper_chunks : split_into
+    paper_chunks ||--o| chunk_embeddings : embedded_as
+    users ||--o{ search_queries : runs
+    search_queries ||--o{ search_results : returns
+    papers ||--o{ search_results : appears_in
+    paper_chunks ||--o{ search_results : matched
+    users ||--o{ questions : asks
+    questions ||--o| answers : answered_by
+    answers ||--o{ answer_evidence : cites
+    paper_chunks ||--o{ answer_evidence : supports
+    users ||--o{ saved_papers : saves
+    papers ||--o{ saved_papers : saved
+
+    users { uuid id PK
+            text email UK
+            text password_hash
+            text full_name
+            boolean is_active }
+    roles { smallint id PK
+            text name UK }
+    user_roles { uuid user_id PK,FK
+                 smallint role_id PK,FK }
+    papers { uuid id PK
+             text title
+             text abstract
+             smallint publication_year
+             text doi UK
+             text venue
+             text url
+             text language
+             int citation_count
+             char64 file_hash UK
+             text processing_status
+             text processing_error
+             uuid uploaded_by FK
+             tsvector search_vector }
+    authors { uuid id PK
+              text full_name
+              text normalized_name UK }
+    paper_authors { uuid paper_id PK,FK
+                    uuid author_id PK,FK
+                    smallint author_order }
+    categories { int id PK
+                 text name UK
+                 text description }
+    paper_categories { uuid paper_id PK,FK
+                       int category_id PK,FK }
+    paper_chunks { uuid id PK
+                   uuid paper_id FK
+                   int chunk_index
+                   text section
+                   int page_number
+                   text content
+                   int token_count
+                   char64 content_hash
+                   tsvector search_vector }
+    chunk_embeddings { uuid chunk_id PK,FK
+                       vector768 embedding
+                       text model
+                       int dimension
+                       int embedding_version
+                       char64 content_hash }
+    search_queries { uuid id PK
+                     uuid user_id FK
+                     text query_text
+                     text search_type
+                     jsonb filters
+                     int result_count }
+    search_results { uuid id PK
+                     uuid search_query_id FK
+                     uuid paper_id FK
+                     uuid chunk_id FK
+                     int rank
+                     float score }
+    questions { uuid id PK
+                uuid user_id FK
+                text question_text }
+    answers { uuid id PK
+              uuid question_id FK,UK
+              text answer_text
+              text status
+              text model }
+    answer_evidence { uuid answer_id PK,FK
+                      uuid chunk_id PK,FK
+                      int rank
+                      float relevance_score }
+    saved_papers { uuid user_id PK,FK
+                   uuid paper_id PK,FK }
