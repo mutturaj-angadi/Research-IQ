@@ -89,4 +89,3 @@ A paper cannot become COMPLETED without at least one chunk and an embedding for 
 
 ## 30. What are the current limitations?
 The verified database contains one paper, so scale is not established. Automated DB suites need a disposable TEST_DATABASE_URL, which was not configured. The GitHub release listing API returned HTTP 429 in this verification.
-

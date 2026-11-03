@@ -80,4 +80,3 @@ No student/course details were supplied or found in the repository; add them on 
 - Future: disposable integration-test DB, larger corpus, quality and latency evaluation, rate-limit handling.
 - GitHub release-list API returned HTTP 429 in this verification; sync was not run.
 - Do not claim production scale from unit tests or one paper.
-

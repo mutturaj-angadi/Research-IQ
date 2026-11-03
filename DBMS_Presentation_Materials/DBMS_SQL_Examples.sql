@@ -76,4 +76,3 @@ ORDER BY rank DESC LIMIT 10;
 -- 11. Applied migration versions; app role intentionally cannot read this ledger.
 SELECT name,applied_at FROM schema_migrations ORDER BY name;
 COMMIT;
-

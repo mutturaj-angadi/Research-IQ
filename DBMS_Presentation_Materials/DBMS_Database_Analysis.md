@@ -92,4 +92,3 @@ PostgreSQL provides transactions, keys, constraints, JSONB, generated columns, f
 - PDF: 10.1109_aero66936.2026.11519907__Inter-Satellite_Link_Configuration_for_Fast_Delivery_in_Low-Earth-Orbit_Constellations.pdf.
 - 42 chunks / 42 vectors; dimension 768; model gemini-embedding-001.
 - Matching answer ANSWERED by gemini-3.5-flash-lite; two evidence relations.
-

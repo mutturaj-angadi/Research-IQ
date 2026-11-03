@@ -141,4 +141,3 @@ erDiagram
 - questions → answers is one-to-zero-or-one because answers.question_id is UNIQUE.
 - GitHub assets can exist before import; paper_id is nullable. A linked paper cannot be deleted while referenced because the FK is RESTRICT.
 - search_results.chunk_id is nullable for paper-level hits. Separate FKs do not enforce that chunk_id belongs to its paper_id.
-

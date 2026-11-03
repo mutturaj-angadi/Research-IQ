@@ -48,4 +48,3 @@ The SQL examples file was executed successfully in a read-only transaction throu
 - GitHub release listing was rate-limited; sync was not attempted.
 - No new PDF was uploaded; the existing real ingestion output was verified.
 - Answer state is ANSWERED, not SUCCESS.
-

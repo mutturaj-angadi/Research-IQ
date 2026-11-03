@@ -50,4 +50,3 @@ Citation [1] resolves to chunk a9720a7b-dc93-428f-abd1-55951694c9ec; citation [2
 - GitHub admin page rendered, but GET /api/admin/github/releases returned 429 from the configured limiter. No sync was run; do not retry during cooldown.
 - TEST_DATABASE_URL is unset. Never point DB test suites at researchiq_dev.
 - No student/course details were found; add them manually.
-

@@ -31,4 +31,3 @@ The database has one completed paper, 42 chunks, and 42 768-dimensional vectors.
 
 ## Slide 10 — Conclusion and Future Scope
 Close with the DBMS concepts behind the AI: reliable relations, foreign keys, constraints, transactions, and indexes. Future work includes a disposable test database, a larger corpus, retrieval-quality evaluation, realistic latency testing, and better GitHub rate-limit handling. One paper is not evidence of production scale.
-
