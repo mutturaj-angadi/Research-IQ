@@ -14,8 +14,9 @@ PostgreSQL 16 + pgvector. Migrations in `database/migrations` are the single sou
 | search_queries, search_results | Search history and ranked results (analytics: most searched/retrieved). |
 | questions, answers, answer_evidence | Question -> answer -> evidence chunks. Evidence is stored separately from answer text. |
 | saved_papers | A user's saved papers. |
+| github_release_assets | External GitHub release asset metadata and import lifecycle linked to the resulting paper; PDF bytes are not persisted. |
 
-Not created (no justified purpose): citations, publishers, journals, conferences, processing_jobs, audit_logs. `venue` replaces journals/conferences; `papers.processing_status/error` replaces a jobs table.
+Not created (no justified purpose): citations, publishers, journals, conferences, processing_jobs, audit_logs. `venue` replaces journals/conferences; `papers.processing_status/error` replaces a general jobs table. GitHub source imports are tracked with the focused `github_release_assets` relation introduced in migration 005.
 
 ## Normalisation (3NF)
 - Authors and categories are separate entities with junction tables (no repeated names, no comma lists).

@@ -125,6 +125,9 @@ Types: `uuid` = gen_random_uuid() default PK unless noted. All timestamps are `t
 | paper_id | uuid | no | PK/FK -> papers, CASCADE |
 | created_at | timestamptz | no | |
 
+## github_release_assets
+Tracks each GitHub release asset by unique asset ID, including repository/release metadata, filename, URL, type/size, checksum, processing status/error, attempt timestamps, initiating admin IDs, and the linked paper. PDF bytes remain in memory and are not stored. Added in migration 005.
+
 ## Indexes (migration 002)
 | Index | Query pattern |
 |---|---|

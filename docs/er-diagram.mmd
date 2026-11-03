@@ -18,6 +18,7 @@ erDiagram
     paper_chunks ||--o{ answer_evidence : supports
     users ||--o{ saved_papers : saves
     papers ||--o{ saved_papers : saved
+    papers o|--o{ github_release_assets : imported_as
 
     users { uuid id PK
             text email UK
@@ -94,3 +95,10 @@ erDiagram
                       float relevance_score }
     saved_papers { uuid user_id PK,FK
                    uuid paper_id PK,FK }
+    github_release_assets { bigint asset_id PK
+                            bigint release_id
+                            text release_tag
+                            text filename
+                            char64 checksum
+                            uuid paper_id FK
+                            text processing_status }

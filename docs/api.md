@@ -21,4 +21,7 @@ Pagination: `page>=1`, `pageSize` 1-50 -> `{ items, page, pageSize, total, total
 | GET /api/categories, /api/authors | papers:read | |
 | GET /api/admin/users, /papers, /processing, /analytics | admin | |
 | POST /api/admin/papers | admin, 10/h | multipart: `file` (PDF <= 20 MB) + optional metadata |
+| GET /api/admin/github/releases | admin, 30/h | release assets with persisted import status |
+| POST /api/admin/github/sync | admin, 10/h | idempotently registers release metadata in PostgreSQL |
+| POST /api/admin/github/import | admin, 120/h | `{assetId}`; downloads a registered asset and runs existing ingestion |
 | GET/POST /api/admin/categories, PATCH/DELETE /api/admin/categories/{id} | admin | delete blocked while assigned |
