@@ -9,7 +9,7 @@ import { paperListQuerySchema, toFilters } from '@/lib/validation/app';
 export const metadata = { title: 'Paper library' };
 
 export default async function Papers({ searchParams }: { searchParams: SearchParams }) {
-  await requirePageUser('papers:read');
+  const user = await requirePageUser('papers:read');
   const sp = await flat(searchParams);
   const parsed = paperListQuerySchema.safeParse(sp);
   if (!parsed.success) return <ErrorState message="Some filters are invalid." retryHref="/papers" />;
@@ -20,9 +20,9 @@ export default async function Papers({ searchParams }: { searchParams: SearchPar
       researchiq.listCategories({ pageSize: 50 }),
     ]);
     return (
-      <div className="stack">
-        <h1>Paper library</h1>
-        <form method="get" className="card grid grid-4" aria-label="Filters">
+      <div className="stack papers-page">
+        <header className="page-heading"><div><span className="eyebrow">DISCOVER AND REVIEW</span><h1>Paper library</h1><p>Browse completed research papers and narrow the collection with filters.</p></div><Link className="btn secondary" href="/search">Search the library <span aria-hidden="true">→</span></Link></header>
+        <form method="get" className="card grid grid-4 filter-card" aria-label="Filters">
           <div><label htmlFor="yf">Year from</label><input id="yf" name="yearFrom" type="number" min={1900} max={2100} defaultValue={sp.yearFrom ?? ''} /></div>
           <div><label htmlFor="yt">Year to</label><input id="yt" name="yearTo" type="number" min={1900} max={2100} defaultValue={sp.yearTo ?? ''} /></div>
           <div><label htmlFor="v">Venue</label><input id="v" name="venue" maxLength={200} defaultValue={sp.venue ?? ''} /></div>
@@ -31,7 +31,10 @@ export default async function Papers({ searchParams }: { searchParams: SearchPar
           <div className="row" style={{ alignItems: 'flex-end' }}><button className="btn sm">Apply</button><Link className="btn secondary sm" href="/papers">Clear filters</Link></div>
         </form>
         <p className="small muted">{list.total} papers · newest first</p>
-        {list.items.length === 0 ? <EmptyState title="No papers found">Adjust the filters, or ask an admin to upload papers.</EmptyState> : (
+        {list.items.length === 0 ? <EmptyState title="No papers found">
+          <p>Adjust the filters, or import a published PDF from the configured GitHub releases.</p>
+          {user.roles.includes('ADMIN') && <Link className="btn sm" href="/admin/github">Open GitHub imports</Link>}
+        </EmptyState> : (
           <div className="stack">{list.items.map((p) => <PaperCard key={p.paperId} {...p} />)}</div>)}
         <Pagination basePath="/papers" params={{ yearFrom: sp.yearFrom, yearTo: sp.yearTo, venue: sp.venue, categoryId: sp.categoryId }} page={list.page} totalPages={list.totalPages} />
       </div>

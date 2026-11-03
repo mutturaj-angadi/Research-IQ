@@ -7,7 +7,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   await requirePageUser('users:read');
   return (
     <div className="stack">
-      <nav className="row" aria-label="Admin"><Link href="/admin">Overview</Link><Link href="/admin/users">Users</Link><Link href="/admin/papers">Papers</Link>
+      <nav className="admin-tabs" aria-label="Admin"><span className="admin-tabs-label">ADMINISTRATION</span><Link href="/admin">Overview</Link><Link href="/admin/users">Users</Link><Link href="/admin/papers">Papers</Link><Link href="/admin/github">GitHub imports</Link>
         <Link href="/admin/categories">Categories</Link><Link href="/admin/processing">Processing</Link><Link href="/admin/analytics">Analytics</Link></nav>
       {children}
     </div>

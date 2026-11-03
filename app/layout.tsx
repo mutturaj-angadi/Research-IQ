@@ -15,6 +15,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <a className="skip" href="#main">Skip to content</a>
         <Navbar />
         <main id="main" className="container">{children}</main>
+        <footer className="site-footer"><span>ResearchIQ <span className="footer-separator">·</span> Evidence-led research discovery</span><span>PostgreSQL <span className="footer-separator">+</span> pgvector</span></footer>
       </body>
     </html>
   );

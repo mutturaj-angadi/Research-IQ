@@ -1,4 +1,6 @@
 'use client';
+
+import Link from 'next/link';
 import { useState, type FormEvent } from 'react';
 import { Card, Spinner } from '@/components/ui';
 import { EvidenceCard } from '@/components/evidence/EvidenceCard';
@@ -46,7 +48,7 @@ export function AskClient() {
             <ol className="small"><li>Your question was converted into an embedding vector.</li><li>pgvector compared it with stored passage embeddings by cosine similarity.</li><li>The top {res.evidence.length} passages above the relevance threshold were selected.</li><li>The language model was asked to answer using only those passages.</li><li>The question, answer and evidence ranking were stored in your history.</li></ol></details>
         </>
       )}
-      {res && res.status === 'NO_EVIDENCE' && <div className="alert warn" role="status"><strong>{NO_EVIDENCE}</strong><p className="small" style={{ margin: '.4rem 0 0' }}>Try rephrasing, or check the <a href="/papers">paper library</a> for relevant coverage.</p></div>}
+      {res && res.status === 'NO_EVIDENCE' && <div className="alert warn" role="status"><strong>{NO_EVIDENCE}</strong><p className="small" style={{ margin: '.4rem 0 0' }}>Try rephrasing, or check the <Link href="/papers">paper library</Link> for relevant coverage.</p></div>}
       {res && res.status === 'FAILED' && <div className="alert err" role="alert">The answer service is unavailable right now. Please try again later.</div>}
     </div>
   );

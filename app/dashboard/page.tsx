@@ -7,7 +7,7 @@ import { flat, fmtDate, type SearchParams } from '@/lib/ui/params';
 export const metadata = { title: 'Dashboard' };
 
 const Stat = ({ label, value }: { label: string; value: number }) => (
-  <Card><div className="stat">{value}</div><div className="muted small">{label}</div></Card>
+  <Card className="metric-card"><div className="metric-value">{value}</div><div className="muted small">{label}</div></Card>
 );
 
 export default async function Dashboard({ searchParams }: { searchParams: SearchParams }) {
@@ -20,8 +20,11 @@ export default async function Dashboard({ searchParams }: { searchParams: Search
     return <ErrorState message="Unable to load your dashboard." retryHref="/dashboard" />;
   }
   return (
-    <div className="stack">
-      <h1>Welcome, {user.fullName}</h1>
+    <div className="stack dashboard-page">
+      <header className="page-heading">
+        <div><span className="eyebrow">YOUR RESEARCH OVERVIEW</span><h1>Welcome back, {user.fullName}</h1><p>Pick up where you left off or explore your paper library.</p></div>
+        <div className="row"><Link className="btn secondary" href="/papers">Browse papers</Link><Link className="btn" href="/ask">Ask ResearchIQ <span aria-hidden="true">→</span></Link></div>
+      </header>
       {sp.denied && <div className="alert warn" role="alert">You do not have permission to access that page.</div>}
       <section className="grid grid-4" aria-label="Library">
         <Stat label="Papers in library" value={d.totals.papers} /><Stat label="Completed papers" value={d.totals.completedPapers} />

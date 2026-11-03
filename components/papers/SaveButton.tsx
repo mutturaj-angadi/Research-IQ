@@ -1,7 +1,10 @@
 'use client';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { setPaperSaved } from '@/lib/ui/actions';
 
 export function SaveButton({ paperId, initiallySaved }: { paperId: string; initiallySaved: boolean }) {
+  const router = useRouter();
   const [saved, setSaved] = useState(initiallySaved);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -9,11 +12,12 @@ export function SaveButton({ paperId, initiallySaved }: { paperId: string; initi
   async function toggle() {
     setBusy(true); setError(null);
     try {
-      const res = await fetch(`/api/saved/${paperId}`, { method: saved ? 'DELETE' : 'PUT' });
-      if (!res.ok) throw new Error();
-      setSaved(!saved);
-    } catch {
-      setError('Could not update saved papers.');
+      const nextSaved = !saved;
+      await setPaperSaved(paperId, nextSaved);
+      setSaved(nextSaved);
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not update saved papers. Please try again.');
     } finally {
       setBusy(false);
     }
