@@ -20,15 +20,26 @@ export const POST = route({
   permission: 'papers:upload',
   rateLimit: { name: 'upload', limit: 10, windowMs: 60 * 60_000, by: 'user' },
   handler: async ({ req, user }) => {
-    if (!(req.headers.get('content-type') ?? '').startsWith('multipart/form-data')) {
+    const contentType = req.headers.get('content-type') ?? '';
+    if (contentType.split(';', 1)[0].trim().toLowerCase() !== 'multipart/form-data' || !/;\s*boundary=(?:"[^"]+"|[^;\s]+)/i.test(contentType)) {
       throw new AppError('VALIDATION_ERROR', 'Expected a multipart/form-data upload');
     }
-    const declared = Number(req.headers.get('content-length') ?? 0);
-    if (declared > MAX_UPLOAD_BYTES + 1024 * 1024) throw new AppError('VALIDATION_ERROR', 'The file is too large');
-    const form = await req.formData();
+    const contentLength = req.headers.get('content-length');
+    if (contentLength !== null) {
+      if (!/^(0|[1-9][0-9]*)$/.test(contentLength) || !Number.isSafeInteger(Number(contentLength))) {
+        throw new AppError('VALIDATION_ERROR', 'Invalid Content-Length');
+      }
+      if (Number(contentLength) > MAX_UPLOAD_BYTES + 1024 * 1024) throw new AppError('PAYLOAD_TOO_LARGE', 'The file is too large');
+    }
+    let form: FormData;
+    try {
+      form = await req.formData();
+    } catch {
+      throw new AppError('VALIDATION_ERROR', 'Malformed multipart/form-data upload');
+    }
     const file = form.get('file');
     if (!(file instanceof File)) throw new AppError('VALIDATION_ERROR', 'A PDF file is required');
-    if (file.size > MAX_UPLOAD_BYTES) throw new AppError('VALIDATION_ERROR', 'The file is too large');
+    if (file.size > MAX_UPLOAD_BYTES) throw new AppError('PAYLOAD_TOO_LARGE', 'The file is too large');
     if (file.type !== 'application/pdf') throw new AppError('VALIDATION_ERROR', 'Only PDF files are accepted');
     const f = parseInput(uploadMetadataFieldSchema, Object.fromEntries(
       ['title', 'authors', 'categories', 'venue', 'publicationYear'].map((k) => [k, form.get(k) ?? undefined]),
