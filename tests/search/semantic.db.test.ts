@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { after, before, describe, it } from 'node:test';
 import type { AnswerGenerator } from '../../lib/ai/answerGenerator';
-import { EvidenceService, NO_EVIDENCE_ANSWER, extractCitedNumbers } from '../../lib/evidence/retrieval';
+import { EvidenceService, NO_EVIDENCE_ANSWER, extractCitedNumbers, hasInvalidCitations } from '../../lib/evidence/retrieval';
 import { searchPapersKeyword } from '../../lib/search/keyword';
 import { SemanticSearchService } from '../../lib/search/semantic';
 import { FakeEmbeddingService } from '../helpers/fakes';
@@ -83,7 +83,7 @@ describe('semantic search, keyword search and evidence', { skip: !HAS_DB }, () =
 
   it('answers only with citations that map to retrieved chunks', async () => {
     let calls = 0;
-    const generator: AnswerGenerator = { model: 'stub', generate: async () => (calls++, 'Claim one [1]. Invented claim [99].') };
+    const generator: AnswerGenerator = { model: 'stub', generate: async () => (calls++, 'Claim one [1].') };
     const svc = new EvidenceService({ db: pool(), search: search(), generator: () => generator });
     const res = await svc.askWithEvidence({ question: 'alpha', topK: 3, filters: { paperIds: [ids.paperA] } }, { userId: ids.user, roles: ['RESEARCHER'] });
     assert.equal(res.status, 'ANSWERED');
@@ -91,6 +91,15 @@ describe('semantic search, keyword search and evidence', { skip: !HAS_DB }, () =
     assert.equal((await svc.getAnswerEvidence(res.answerId, { userId: ids.user, roles: ['RESEARCHER'] })).length, 1);
     await assert.rejects(svc.getAnswerEvidence(res.answerId, { userId: randomUUID(), roles: ['RESEARCHER'] }), { code: 'FORBIDDEN' });
     assert.equal(calls, 1);
+  });
+
+  it('fails closed when the answer contains a citation not present in retrieved evidence', async () => {
+    const generator: AnswerGenerator = { model: 'stub', generate: async () => 'Supported claim [1]. Fabricated source [99].' };
+    const svc = new EvidenceService({ db: pool(), search: search(), generator: () => generator });
+    const res = await svc.askWithEvidence({ question: 'alpha', topK: 3, filters: { paperIds: [ids.paperA] } }, { userId: ids.user, roles: ['RESEARCHER'] });
+    assert.equal(res.status, 'NO_EVIDENCE');
+    assert.equal(res.answer, NO_EVIDENCE_ANSWER);
+    assert.deepEqual(res.evidence, []);
   });
 
   it('does not call the answer model when no evidence is retrieved', async () => {
@@ -109,5 +118,11 @@ describe('extractCitedNumbers', () => {
   it('keeps only provided source numbers, in order, without duplicates', () => {
     assert.deepEqual(extractCitedNumbers('A [2] B [1][2] C [9] D [0]', 3), [2, 1]);
     assert.deepEqual(extractCitedNumbers('no citations here', 3), []);
+  });
+
+  it('detects citations that do not map to supplied sources', () => {
+    assert.equal(hasInvalidCitations('Claim [1] and [2]', 2), false);
+    assert.equal(hasInvalidCitations('Claim [1] and [99]', 2), true);
+    assert.equal(hasInvalidCitations('Claim [0]', 2), true);
   });
 });

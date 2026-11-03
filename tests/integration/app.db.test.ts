@@ -14,7 +14,10 @@ const created: string[] = [];
 
 async function newUser(role: 'RESEARCHER' | 'ADMIN' = 'RESEARCHER') {
   const email = uniqueEmail();
-  const { id } = await registerUser(creds(email), role);
+  const { id } = await registerUser(creds(email));
+  if (role === 'ADMIN') {
+    await getPool().query(`UPDATE user_roles SET role_id = (SELECT id FROM roles WHERE name = $2) WHERE user_id = $1`, [id, role]);
+  }
   created.push(id);
   return { id, email };
 }
@@ -25,10 +28,12 @@ after(async () => {
 });
 
 describe('authentication (database)', { skip: !HAS_DB }, () => {
-  it('registers, stores only a hash, and authenticates', async () => {
+  it('registers as a researcher, stores only a hash, and authenticates', async () => {
     const { id, email } = await newUser();
     const { rows } = await getPool().query<{ password_hash: string }>(`SELECT password_hash FROM users WHERE id = $1`, [id]);
+    const { rows: roleRows } = await getPool().query<{ name: string }>(`SELECT r.name FROM user_roles ur JOIN roles r ON r.id = ur.role_id WHERE ur.user_id = $1`, [id]);
     assert.ok(rows[0]?.password_hash.startsWith('scrypt$'));
+    assert.deepEqual(roleRows.map((r) => r.name), ['RESEARCHER']);
     assert.ok(!rows[0]?.password_hash.includes(PASSWORD));
     assert.equal((await authenticateUser({ email: email.toUpperCase(), password: PASSWORD })).id, id);
   });

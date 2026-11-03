@@ -15,11 +15,13 @@ export async function hashPassword(password: string): Promise<string> {
 }
 
 export async function verifyPassword(password: string, stored: string): Promise<boolean> {
-  const [alg, n, r, p, saltB64, hashB64] = stored.split('$');
-  if (alg !== 'scrypt' || !n || !r || !p || !saltB64 || !hashB64) return false;
+  if (typeof stored !== 'string' || stored.length > 256) return false;
+  const [alg, n, r, p, saltB64, hashB64, extra] = stored.split('$');
+  // Do not allow a malformed/corrupted database value to select unbounded scrypt parameters.
+  if (alg !== 'scrypt' || n !== String(N) || r !== String(R) || p !== String(P) || !saltB64 || !hashB64 || extra !== undefined) return false;
   const expected = Buffer.from(hashB64, 'base64');
-  const key = await scrypt(password, Buffer.from(saltB64, 'base64'), expected.length, {
-    N: Number(n), r: Number(r), p: Number(p), maxmem: 64 * 1024 * 1024,
-  });
+  const salt = Buffer.from(saltB64, 'base64');
+  if (salt.length !== 16 || expected.length !== KEYLEN || salt.toString('base64') !== saltB64 || expected.toString('base64') !== hashB64) return false;
+  const key = await scrypt(password, salt, KEYLEN, { N, r: R, p: P, maxmem: 64 * 1024 * 1024 });
   return key.length === expected.length && timingSafeEqual(key, expected);
 }

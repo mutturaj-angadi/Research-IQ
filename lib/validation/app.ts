@@ -83,3 +83,5 @@ export const uploadMetadataFieldSchema = z.object({
   venue: z.string().trim().max(300).optional(),
   publicationYear: optInt(1900, 2100),
 });
+
+export const githubImportBodySchema = z.object({ assetId: z.number().int().positive().max(Number.MAX_SAFE_INTEGER) });

@@ -38,4 +38,10 @@ describe('detectMetadata', () => {
   it('falls back to the file name for the title', () => {
     assert.equal(detectMetadata([''], 'my_great-paper.pdf').title, 'my great paper');
   });
+
+  it('uses the complete title suffix from a GitHub release filename when the PDF title wraps', () => {
+    const filename = '10.1109_aero66936.2026.11519907__Inter-Satellite_Link_Configuration_for_Fast_Delivery_in_Low-Earth-Orbit_Constellations.pdf';
+    const m = detectMetadata(['Inter-Satellite Link Configuration for Fast Delivery in\nLow-Earth-Orbit Constellations\nArman Mollakhani'], filename);
+    assert.equal(m.title, 'Inter-Satellite Link Configuration for Fast Delivery in Low-Earth-Orbit Constellations');
+  });
 });

@@ -11,8 +11,8 @@ export interface UserDTO { id: string; email: string; fullName: string; roles: R
 // Verified against when the email is unknown, so response time does not reveal which emails exist.
 const DUMMY_HASH = 'scrypt$16384$8$1$AAAAAAAAAAAAAAAAAAAAAA==$' + Buffer.alloc(64).toString('base64');
 
-/** New accounts are always RESEARCHER. Admins are created out of band (`npm run create-admin`) or by an admin. */
-export async function registerUser(raw: unknown, role: Role = 'RESEARCHER'): Promise<{ id: string }> {
+/** Public registration always assigns RESEARCHER. Admins are bootstrapped out of band. */
+export async function registerUser(raw: unknown): Promise<{ id: string }> {
   const input = parseInput(registerSchema, raw);
   const passwordHash = await hashPassword(input.password);
   try {
@@ -23,7 +23,8 @@ export async function registerUser(raw: unknown, role: Role = 'RESEARCHER'): Pro
         [input.email, passwordHash, input.fullName],
       );
       const id = (u as { id: string }).id;
-      await run(tx, `INSERT INTO user_roles (user_id, role_id) SELECT $1, id FROM roles WHERE name = $2`, [id, role]);
+      const roles = await run(tx, `INSERT INTO user_roles (user_id, role_id) SELECT $1, id FROM roles WHERE name = 'RESEARCHER' RETURNING role_id`, [id]);
+      if (roles.length !== 1) throw new AppError('INTERNAL_ERROR', 'The researcher role is unavailable');
       return { id };
     });
   } catch (err) {

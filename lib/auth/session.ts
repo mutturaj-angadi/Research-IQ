@@ -43,6 +43,9 @@ export async function logout(): Promise<void> {
 /** Re-reads the user from the database every request, so deactivation and role changes apply immediately. */
 export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  // Public pages and unauthenticated API calls do not need a signing key. Require it whenever
+  // there is a session to verify, and always require it before issuing a session.
+  if (!token) return null;
   const payload = verifyToken(token, secret());
   return payload ? loadUser(payload.sub) : null;
 });

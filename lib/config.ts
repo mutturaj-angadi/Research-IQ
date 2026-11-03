@@ -15,6 +15,8 @@ const envSchema = z
     AI_API_KEY: z.string().min(1).optional(),
     AI_BASE_URL: z.string().url().default('https://api.openai.com/v1'),
     AI_MODEL: z.string().min(1).default('gpt-4o-mini'),
+    AI_TIMEOUT_MS: z.coerce.number().int().min(1000).max(120_000).default(45_000),
+    AI_RETRY_ATTEMPTS: z.coerce.number().int().min(1).max(4).default(3),
 
     CHUNK_SIZE_CHARS: z.coerce.number().int().min(300).max(4000).default(1200),
     CHUNK_OVERLAP_CHARS: z.coerce.number().int().min(0).max(1000).default(200),

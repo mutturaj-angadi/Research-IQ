@@ -17,6 +17,8 @@ describe('password hashing', () => {
   });
 
   it('rejects malformed stored hashes instead of throwing', async () => {
-    for (const bad of ['', 'plaintext', 'bcrypt$1$2$3$4$5', 'scrypt$x']) assert.equal(await verifyPassword('x', bad), false);
+    for (const bad of ['', 'plaintext', 'bcrypt$1$2$3$4$5', 'scrypt$x', 'scrypt$999999999$8$1$AAAAAAAAAAAAAAAAAAAAAA==$AAAA', 'scrypt$16384$8$1$AAAA$AAAA']) {
+      assert.equal(await verifyPassword('x', bad), false);
+    }
   });
 });

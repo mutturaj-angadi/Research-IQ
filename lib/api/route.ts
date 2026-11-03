@@ -17,7 +17,7 @@ interface Options<P> {
 
 /** Route Handler -> auth -> authorization -> rate limit -> handler -> uniform JSON envelope. */
 export function route<P = Record<string, never>>(opts: Options<P>) {
-  return async (req: Request, ctx?: { params: Promise<P> }): Promise<Response> => {
+  return async (req: Request, ctx: { params: Promise<P> }): Promise<Response> => {
     try {
       assertSameOrigin(req);
       if (opts.rateLimit && opts.rateLimit.by !== 'user') limiter(opts.rateLimit.name, opts.rateLimit.limit, opts.rateLimit.windowMs).check(clientIp(req));
@@ -26,7 +26,7 @@ export function route<P = Record<string, never>>(opts: Options<P>) {
         user = await requireAuth(opts.permission === 'authenticated' ? undefined : opts.permission);
         if (opts.rateLimit?.by === 'user') limiter(opts.rateLimit.name, opts.rateLimit.limit, opts.rateLimit.windowMs).check(user.id);
       }
-      const params = (ctx?.params ? await ctx.params : {}) as P;
+      const params = await ctx.params;
       const data = await opts.handler({ req, user: user as CurrentUser, params, url: new URL(req.url) });
       if (data instanceof Response) return data;
       return ok(data, opts.status);

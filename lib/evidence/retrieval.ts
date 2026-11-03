@@ -22,6 +22,15 @@ export function extractCitedNumbers(answer: string, sourceCount: number): number
   return cited;
 }
 
+/** True if the model cites any source number that was not supplied to it. */
+export function hasInvalidCitations(answer: string, sourceCount: number): boolean {
+  for (const match of answer.matchAll(/\[(\d{1,3})\]/g)) {
+    const n = Number(match[1]);
+    if (n < 1 || n > sourceCount) return true;
+  }
+  return false;
+}
+
 function toEvidenceItem(r: SemanticSearchResult, rank: number): EvidenceItem {
   return {
     rank,
@@ -53,6 +62,7 @@ export class EvidenceService {
     const sources: AnswerSource[] = retrieval.results.map((r, i) => ({
       number: i + 1,
       title: r.paperTitle,
+      chunkId: r.chunkId,
       section: r.section,
       pageNumber: r.pageNumber,
       content: r.content,
@@ -68,7 +78,7 @@ export class EvidenceService {
     }
 
     const cited = extractCitedNumbers(text, sources.length);
-    if (text.trim() === INSUFFICIENT_EVIDENCE || cited.length === 0) {
+    if (text.trim() === INSUFFICIENT_EVIDENCE || cited.length === 0 || hasInvalidCitations(text, sources.length)) {
       return this.persist(ctx, input.question, 'NO_EVIDENCE', NO_EVIDENCE_ANSWER, generator.model, []);
     }
     const evidence = cited.map((n, i) => toEvidenceItem(retrieval.results[n - 1] as SemanticSearchResult, i + 1));

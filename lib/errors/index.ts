@@ -1,5 +1,6 @@
 export type ErrorCode =
   | 'VALIDATION_ERROR'
+  | 'PAYLOAD_TOO_LARGE'
   | 'NOT_FOUND'
   | 'DUPLICATE_RESOURCE'
   | 'DATABASE_ERROR'
@@ -13,6 +14,7 @@ export type ErrorCode =
 
 const HTTP_STATUS: Record<ErrorCode, number> = {
   VALIDATION_ERROR: 400,
+  PAYLOAD_TOO_LARGE: 413,
   NOT_FOUND: 404,
   DUPLICATE_RESOURCE: 409,
   DATABASE_ERROR: 500,

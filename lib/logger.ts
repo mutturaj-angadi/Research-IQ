@@ -25,7 +25,14 @@ export const logger = {
 export function errorFields(err: unknown): Fields {
   if (err instanceof Error) {
     const code = (err as { code?: unknown }).code;
-    return { errorName: err.name, errorCode: typeof code === 'string' ? code : undefined };
+    const safe = err as { providerCategory?: unknown; providerStatus?: unknown; attempts?: unknown };
+    return {
+      errorName: err.name,
+      errorCode: typeof code === 'string' ? code : undefined,
+      providerCategory: typeof safe.providerCategory === 'string' ? safe.providerCategory : undefined,
+      providerStatus: typeof safe.providerStatus === 'number' ? safe.providerStatus : undefined,
+      attempts: typeof safe.attempts === 'number' ? safe.attempts : undefined,
+    };
   }
   return { errorName: 'NonError' };
 }

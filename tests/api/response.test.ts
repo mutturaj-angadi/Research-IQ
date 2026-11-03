@@ -14,6 +14,7 @@ describe('API envelope', () => {
     const cases: [AppError, number, string][] = [
       [new AppError('UNAUTHORIZED', 'x'), 401, 'UNAUTHORIZED'], [new AppError('FORBIDDEN', 'x'), 403, 'FORBIDDEN'],
       [new AppError('NOT_FOUND', 'x'), 404, 'NOT_FOUND'], [new AppError('RATE_LIMITED', 'x'), 429, 'RATE_LIMITED'],
+      [new AppError('PAYLOAD_TOO_LARGE', 'x'), 413, 'PAYLOAD_TOO_LARGE'],
       [new AppError('DUPLICATE_RESOURCE', 'x'), 409, 'CONFLICT'], [new AppError('VALIDATION_ERROR', 'x', [{ path: 'q', message: 'bad' }]), 400, 'VALIDATION_ERROR'],
     ];
     for (const [err, status, code] of cases) {
@@ -38,13 +39,19 @@ describe('API envelope', () => {
 describe('request guards', () => {
   it('rejects malformed and oversized JSON', async () => {
     await assert.rejects(readJson(new Request('http://x', { method: 'POST', body: '{bad' })), { code: 'VALIDATION_ERROR' });
-    await assert.rejects(readJson(new Request('http://x', { method: 'POST', body: JSON.stringify({ a: 'x'.repeat(70_000) }) })), { code: 'VALIDATION_ERROR' });
+    await assert.rejects(readJson(new Request('http://x', { method: 'POST', body: JSON.stringify({ a: 'x'.repeat(70_000) }) })), { code: 'PAYLOAD_TOO_LARGE' });
     assert.deepEqual(await readJson(new Request('http://x', { method: 'POST', body: '{"a":1}' })), { a: 1 });
+    await assert.rejects(readJson(new Request('http://x', { method: 'POST', body: JSON.stringify({ a: 'é'.repeat(40_000) }) })), { code: 'PAYLOAD_TOO_LARGE' });
+    await assert.rejects(readJson(new Request('http://x', { method: 'POST', headers: { 'content-length': '2x' }, body: '{}' })), { code: 'VALIDATION_ERROR' });
+    await assert.rejects(readJson(new Request('http://x', { method: 'POST', headers: { 'content-length': '3' }, body: '{}' })), { code: 'VALIDATION_ERROR' });
+    const aborted = new ReadableStream<Uint8Array>({ start(controller) { controller.error(new Error('client disconnected')); } });
+    await assert.rejects(readJson(new Request('http://x', { method: 'POST', body: aborted, duplex: 'half' } as RequestInit & { duplex: 'half' })), { code: 'VALIDATION_ERROR' });
   });
 
   it('blocks cross-origin state-changing requests', () => {
     const req = (method: string, origin?: string) => new Request('http://app.test/api/x', { method, headers: { host: 'app.test', ...(origin && { origin }) } });
     assert.throws(() => assertSameOrigin(req('POST', 'http://evil.test')), { code: 'FORBIDDEN' });
+    assert.throws(() => assertSameOrigin(new Request('http://app.test/api/x', { method: 'POST', headers: { 'sec-fetch-site': 'cross-site' } })), { code: 'FORBIDDEN' });
     assert.doesNotThrow(() => assertSameOrigin(req('POST', 'http://app.test')));
     assert.doesNotThrow(() => assertSameOrigin(req('POST')));
     assert.doesNotThrow(() => assertSameOrigin(req('GET', 'http://evil.test')));
