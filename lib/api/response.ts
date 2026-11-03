@@ -74,4 +74,3 @@ export async function readJson(req: Request, maxBytes = 64 * 1024): Promise<unkn
 export function queryObject(url: URL): Record<string, string> {
   return Object.fromEntries(url.searchParams.entries());
 }
-
